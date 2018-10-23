@@ -183,6 +183,10 @@
 #include <sys/types.h>
 #endif
 
+#ifdef __APPLE__
+#include <CoreFoundation/CoreFoundation.h>
+#endif
+
 #include <string.h>
 #include <stddef.h>
 #include "allheaders.h"
@@ -3035,8 +3039,17 @@ char  dirname[240];
 
     PROCNAME("l_makeTempFilename");
 
+#ifdef __APPLE__
+{
+    size_t n = confstr(_CS_DARWIN_USER_TEMP_DIR, dirname, sizeof(dirname));
+    if (n == 0) {
+      return (char *)ERROR_PTR("failed to find tmp dir", procName, NULL);
+    }
+}
+#else
     if (makeTempDirname(dirname, sizeof(dirname), NULL) == 1)
         return (char *)ERROR_PTR("failed to make dirname", procName, NULL);
+#endif
 
 #ifndef _WIN32
 {
